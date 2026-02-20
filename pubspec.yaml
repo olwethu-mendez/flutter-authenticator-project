@@ -1,0 +1,78 @@
+name: authentipass
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.3
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  go_router:
+  flutter_bloc:
+  equatable:
+  dartz:
+  shared_preferences:
+  get_it:
+  app_links:
+
+  change_app_package_name:
+  image_picker: 
+  google_fonts: 
+  transparent_image: 
+  intl: 
+  uuid: 
+  cached_network_image: ^3.4.1 
+  url_launcher: 
+  flutter_cache_manager: 
+  connectivity_plus: 
+  dio: 
+  flutter_secure_storage: 
+  jwt_decoder: 
+  path_provider: 
+  flutter_native_splash: 
+  flutter_launcher_icons: 
+  #photo_view: 
+  permission_handler: 
+  collection: 
+  json_annotation:  
+  printing: ^5.14.2
+  pdf:
+  country_flags: ^4.1.0
+  country_codes: ^3.3.0
+  local_auth: ^3.0.0
+  pinput: ^6.0.1
+  share_plus: ^12.0.1
+  signalr_netcore: ^1.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter_native_splash:
+  color: "#183454" # Deep Purple (Match your theme)
+  image: assets/images/authentipass.png
+  #branding: assets/branding/rank_collection_text.png
+  
+  # Android 12+ specific settings
+  android_12:
+    image: assets/images/authentipass.png # Must be 1152x1152px
+    icon_background_color: "#4b6f79"
+    #branding: assets/branding/rank_collection_text.png
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/authentipass.png"
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
