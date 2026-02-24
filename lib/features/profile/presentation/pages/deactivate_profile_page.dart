@@ -143,7 +143,7 @@ Widget _buildImprovedLayout(BuildContext context, ProfileState state) {
           // 2. Action Card
           Card(
             elevation: 0,
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(20.0),

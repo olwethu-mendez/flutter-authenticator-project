@@ -146,7 +146,7 @@ Widget build(BuildContext context) {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedGender, // Use value, not initialValue for controlled widgets
+                initialValue: selectedGender, // Use value, not initialValue for controlled widgets
                 items: ["Male", "Female", "Non-Binary", "Genderfluid", "Other", "Prefer Not To Say"]
                     .map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
                 onChanged: (val) => setState(() => selectedGender = val!),

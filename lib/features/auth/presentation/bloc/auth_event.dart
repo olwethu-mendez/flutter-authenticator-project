@@ -41,7 +41,14 @@ class AuthRefreshTokenRequested extends AuthEvent{
   List<Object?> get props => [refreshToken];
 }
 
-class AuthLogoutRequested extends AuthEvent{}
+class AuthLogoutRequested extends AuthEvent{
+  final String? message;
+
+  const AuthLogoutRequested({this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
 
 class AuthUpdateDeactivationStatus extends AuthEvent {}
 

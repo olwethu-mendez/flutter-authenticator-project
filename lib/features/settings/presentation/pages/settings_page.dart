@@ -172,7 +172,7 @@ class _SettingsPageState extends State<SettingsPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
       child: child,
     );
   }

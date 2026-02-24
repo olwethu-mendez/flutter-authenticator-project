@@ -192,7 +192,7 @@ class ProfileManagerPage extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),

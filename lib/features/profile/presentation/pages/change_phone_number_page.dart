@@ -67,7 +67,7 @@ class _ChangePhoneNumberPageState extends State<ChangePhoneNumberPage> {
                         width: 100,
                         child: DropdownButtonFormField<String>(
                           // Use the validated localCode
-                          value: _supportedCodes.contains(localCode)
+                          initialValue: _supportedCodes.contains(localCode)
                               ? localCode
                               : _supportedCodes.first,
                           items: _supportedCodes.map((code) {

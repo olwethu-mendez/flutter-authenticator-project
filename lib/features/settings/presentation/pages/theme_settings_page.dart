@@ -97,7 +97,7 @@ class _ThemeOptionTile extends StatelessWidget {
       elevation: 0,
       color: isSelected 
           ? colorScheme.primaryContainer.withOpacity(0.5) 
-          : colorScheme.surfaceVariant.withOpacity(0.2),
+          : colorScheme.surfaceContainerHighest.withOpacity(0.2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isSelected 

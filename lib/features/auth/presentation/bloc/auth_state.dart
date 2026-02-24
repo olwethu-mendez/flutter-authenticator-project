@@ -49,7 +49,14 @@ class AuthProfileCreationRequired extends AuthState {
   // New State: Token exists, but profile is missing
 }
 
-class AuthUnauthenticated extends AuthState {}
+class AuthUnauthenticated extends AuthState {
+  final String? message;
+
+  const AuthUnauthenticated({this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
 
 class AuthForgotPasswordOtp extends AuthState{
   final String username;

@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:authentipass/core/api/app_config.dart';
 import 'package:authentipass/features/auth/data/datasources/auth_local_datasource.dart';
-import 'package:signalr_netcore/hub_connection.dart';
-import 'package:signalr_netcore/hub_connection_builder.dart';
+import 'package:flutter/foundation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 class SignalRService {
@@ -18,32 +17,42 @@ class SignalRService {
     final token = await localDataSource.getCachedToken();
     if (token == null) return;
 
+
     _hubConnection = HubConnectionBuilder()
         .withUrl(
-          "${AppConfig.apiBaseUrl}/userHub",
+          AppConfig.usersHub,
           options: HttpConnectionOptions(accessTokenFactory: () async => token),
         )
         .withAutomaticReconnect()
         .build();
 
     _hubConnection?.on("ReceiveAccountStatus", (arguments) {
-      final data = arguments![0] as Map<String, dynamic>;
+      final Map<dynamic, dynamic> data = arguments![0] as Map<String, dynamic>;
       _statusController.add(
         UserStatusMessage(
-          data['userId'], // Ensure your C# sends this back!
-          data['isDeactivated'],
+          data['userId'].toString(), // Ensure your C# sends this back!
+          data['isDeactivated'] as bool,
+          data['message'].toString(),
         ),
       );
+      if (kDebugMode) {
+        print("${_hubConnection?.state?.name}: ${data['message']}");
+      }
     });
 
+    if (kDebugMode) print(_hubConnection?.baseUrl);
     await _hubConnection?.start();
   }
 
-  void stop() => _hubConnection?.stop();
+  void stop() async {
+    await _hubConnection?.stop();
+    if (kDebugMode) print("hub connection stopped");
+  }
 }
 
 class UserStatusMessage {
   final String userId;
   final bool isDeactivated;
-  UserStatusMessage(this.userId, this.isDeactivated);
+  final String message;
+  UserStatusMessage(this.userId, this.isDeactivated, this.message);
 }

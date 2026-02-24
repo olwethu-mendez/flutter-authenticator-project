@@ -14,7 +14,6 @@ var kDarkColorScheme = ColorScheme.fromSeed(
 
 class AppTheme {
   static final ThemeData darkMode = ThemeData.dark().copyWith(
-    useMaterial3: true,
     colorScheme: kDarkColorScheme,
 
     // High contrast AppBar: Deep surface with bright primary text
@@ -41,7 +40,6 @@ class AppTheme {
   );
 
   static final ThemeData lightMode = ThemeData().copyWith(
-    useMaterial3: true,
     colorScheme: kColorScheme,
 
     appBarTheme: const AppBarTheme().copyWith(

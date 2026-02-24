@@ -158,6 +158,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await checkAuthUseCase(NoParams());
     result.fold((failure) => emit(AuthUnauthenticated()), (isAuthenticated) {
       if (isAuthenticated) {
+        _signalRService.initHub(); // 👈 ADD THIS
         emit(_buildAuthenticatedState(token));
       } else {
         emit(AuthUnauthenticated());
@@ -181,6 +182,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.login.password ?? "",
         event.login.countryCode,
       );
+      _signalRService.initHub(); // 👈 ADD THIS
       emit(_buildAuthenticatedState(authResult.token!));
     });
   }
@@ -231,7 +233,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       result.fold(
         (failure) => emit(AuthError(message: failure.message)),
-        (authResult) => emit(_buildAuthenticatedState(authResult.token!)),
+        (authResult) {
+          _signalRService.initHub(); // 👈 ADD THIS
+           emit(_buildAuthenticatedState(authResult.token!));
+        },
       );
     } catch (e) {
       emit(AuthError(message: "Biometric login failed: $e"));
@@ -298,6 +303,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.register.password ?? "",
         event.register.countryCode,
       );
+      _signalRService.initHub(); // 👈 ADD THIS
       emit(_buildAuthenticatedState(authResult.token!));
     });
   }
@@ -306,7 +312,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    //emit(AuthLoading());
 
     final result = await logoutUseCase(NoParams());
 
@@ -314,7 +320,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(
         AuthError(message: failure.message),
       ), // Or just force Unauthenticated
-      (_) => emit(AuthUnauthenticated()),
+      (_) => emit(AuthUnauthenticated(message: event.message)),
     );
   }
 

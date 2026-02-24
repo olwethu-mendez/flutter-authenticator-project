@@ -90,7 +90,14 @@ class _AuthenticatorAppState extends State<AuthenticatorApp> {
                             state.message,
                             Colors.red,
                           );
-                        } else if (state is AuthPasswordReset) {
+                          
+                        } else if(state is AuthUnauthenticated && state.message != null){
+                          _showGlobalSnackBar(
+                            context,
+                            state.message!,
+                            Colors.red,
+                          );                            
+                          }else if (state is AuthPasswordReset) {
                           _showGlobalSnackBar(
                             context,
                             "Password reset successfully! Please login.",
