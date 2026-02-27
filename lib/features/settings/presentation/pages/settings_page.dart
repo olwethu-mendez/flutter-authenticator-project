@@ -27,6 +27,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final profileState = context.read<ProfileBloc>().state;
     profile = (profileState is ProfileLoaded) ? profileState.profile : null;
+
   }
 
   @override
@@ -42,14 +43,17 @@ class _SettingsPageState extends State<SettingsPage> {
             (curr is SettingsStatus && !curr.isUpdate) || curr is SettingsLoading,
         builder: (context, state) {
           bool isBioEnabled = false;
+  bool isBioSupported = false;
           bool isLoading = state is SettingsLoading;
-
+          
           if (state is SettingsStatus) {
             isBioEnabled = state.bioAuthEnabled;
+            isBioSupported = state.bioSupported;
           }
 
           return ListView(
             children: [
+              if(isBioSupported) ...[
               _buildSectionHeader('Security'),
               _buildSettingCard(
                 child: SwitchListTile.adaptive(
@@ -65,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           );
                         },
                 ),
-              ),
+              ),],
               _buildSectionHeader('Accessibility'),
               BlocBuilder<ThemeBloc, ThemeState>(
                 builder: (context, themeState) {

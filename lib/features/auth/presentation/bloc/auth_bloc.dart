@@ -19,6 +19,7 @@ import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
 import 'package:authentipass/features/settings/data/datasource/settings_local_datasource.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:local_auth/local_auth.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final CheckAuthUseCase checkAuthUseCase;
@@ -192,12 +193,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final hasAccount = await authLocalDataSource.hasBiometricCredentials();
-    final isEnabledInSettings = await settingsLocalDataSource
-        .getBiometricAuthSettings();
+    final isEnabledInSettings = await settingsLocalDataSource.getBiometricAuthSettings();
+
+    final LocalAuthentication auth = LocalAuthentication();
+
+    final canAuthenticateWithBiometric = await auth.canCheckBiometrics;
+    final isHardwareSupported = await auth.isDeviceSupported();
+
+    final List<BiometricType> availableBiometrics = await auth.getAvailableBiometrics();
+    final hasEnrolledBiometrics = availableBiometrics.isNotEmpty;
+
+    final isAvailable = hasAccount && (isEnabledInSettings ?? false) &&
+                        (canAuthenticateWithBiometric || isHardwareSupported) && hasEnrolledBiometrics;
+
     emit(
-      BiometricAvailabilityChecked(
-        hasAccount && (isEnabledInSettings ?? false),
-      ),
+      BiometricAvailabilityChecked(isAvailable),
     );
   }
 
