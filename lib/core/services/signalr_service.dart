@@ -4,7 +4,6 @@ import 'package:authentipass/core/api/app_config.dart';
 import 'package:authentipass/core/services/signal_r/exponential_retry_policy.dart';
 import 'package:authentipass/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:flutter/foundation.dart';
-import 'package:signalr_netcore/iretry_policy.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 class SignalRService {
