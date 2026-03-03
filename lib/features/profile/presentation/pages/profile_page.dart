@@ -4,6 +4,7 @@ import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
 import 'package:authentipass/features/auth/presentation/pages/splash_page.dart';
 import 'package:authentipass/features/profile/data/models/user_profile_model.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:authentipass/features/profile/presentation/bloc/profile_event.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_state.dart';
 import 'package:authentipass/utilities/date_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -11,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -59,7 +59,12 @@ Future<void> _shareProfileLink(UserProfileModel profile) async {
             final profile = (state is ProfileLoaded) ? state.profile : null;
 
             if (profile == null) return SplashPage();
-            return _buildProfileContent(context, profile, false);
+            return RefreshIndicator.adaptive(
+              onRefresh: () async {
+                context.read<ProfileBloc>().add(FetchProfileRequested());
+              },
+              child: _buildProfileContent(context, profile, false)
+            );
           },
         ),
       ),
