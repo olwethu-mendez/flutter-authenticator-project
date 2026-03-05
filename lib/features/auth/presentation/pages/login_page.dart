@@ -1,4 +1,5 @@
 // features/auth/presentation/pages/login_page.dart
+import 'package:auth_shared/widget/library.dart';
 import 'package:authentipass/features/auth/domain/entity/login_entity.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:country_flags/country_flags.dart';
@@ -145,64 +146,12 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         else
-                          MergeSemantics(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 100,
-                                  child: DropdownButtonFormField<String>(
-                                    // Use the validated localCode
-                                    initialValue: _supportedCodes.contains(localCode)
-                                        ? localCode
-                                        : _supportedCodes.first,
-                                    decoration: InputDecoration(
-                                      semanticCounterText: "Country Code dropdown field"
-                                    ),
-                                    items: _supportedCodes.map((code) {
-                                      return DropdownMenuItem(
-                                        value: code,
-                                        child: Row(
-                                          children: [
-                                            CountryFlag.fromPhonePrefix(
-                                              code,
-                                              theme: const ImageTheme(
-                                                height: 16,
-                                                width: 24,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(code),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (val) {
-                                      if (val != null) {
-                                        setState(() {
-                                          localCode = val;
-                                          countryCodeController.text = val;
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: TextField(
-                                    controller: phoneNumberController,
-                                    keyboardType: TextInputType.numberWithOptions(),
-                                    decoration: const InputDecoration(
-                                      labelText: "Phone Number",
-                                      semanticCounterText: "Phone number input field"
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                    
+                          PhoneNumberInput(
+                            supportedCodes: _supportedCodes, 
+                            phoneNumberController: phoneNumberController,
+                            countryCodeController: countryCodeController, 
+                            localCode: localCode
+                          ),                    
                         const SizedBox(height: 16),
                         TextField(
                           controller: passwordController,

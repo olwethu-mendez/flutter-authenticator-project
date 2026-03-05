@@ -10,8 +10,17 @@ class ErrorInterceptor extends Interceptor {
     String message = "An unexpected error occurred";
     
     if (err.response?.data != null && err.response?.data is Map) {
-      // This looks for your "error" key from Swagger
-      message = err.response?.data['error'] ?? err.response?.data['message'] ?? message;
+      final data = err.response!.data as Map<String, dynamic>;
+
+      if(data.containsKey('errors') && data['errors'] is Map){
+        final validationErrors = data['errors'] as Map<String, dynamic>;
+
+        message = validationErrors.values.expand((e) =>
+          e is List ? e : [e.toString()]).join("\n");
+      }
+      else{
+        message = data['error'] ?? data['message'] ?? message;
+      }
     }
     print("API ERROR DATA: ${err.response?.data}");
     // Map HTTP Status Codes to your Custom Exceptions
