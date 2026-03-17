@@ -4,6 +4,8 @@ import 'package:authentipass/app_builder/app_features.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_event.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
+import 'package:authentipass/features/home/presentation/pages/page_not_found.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,6 +44,7 @@ class AppRouter {
         final bool isLoggingIn = location == '/login';
         final bool isRegistering = location == '/register';
         final bool isOnSplash = location == '/';
+        final bool hasCreatedOrganisations = location == '/create-organisation';
 
         // 1. ALLOW INITIALIZATION
         // If we are in Initial/Loading, ONLY return null if we are already on the Splash screen.
@@ -104,7 +107,7 @@ class AppRouter {
           }
 
           // Priority D: If fully verified but sitting on Splash/Login/Register, go Home
-          if (isLoggingIn || isRegistering || isOnSplash) {
+          if (isLoggingIn || isRegistering || isOnSplash /*|| hasCreatedOrganisations*/) {
             return '/home';
           }
         }
@@ -120,6 +123,9 @@ class AppRouter {
             ),
           )
           .toList(),
+  errorPageBuilder: (context, state) => MaterialPage(
+    child: const PageNotFound(),
+  ),
     );
   }
 }

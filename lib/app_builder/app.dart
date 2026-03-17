@@ -6,6 +6,7 @@ import 'package:authentipass/dependency_injection.dart' as di;
 import 'package:authentipass/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_event.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_state.dart';
 import 'package:authentipass/features/settings/presentation/bloc/settings_bloc.dart';
@@ -60,6 +61,7 @@ class _AuthenticatorAppState extends State<AuthenticatorApp> {
         BlocProvider(create: (_) => di.sl<UsersViewBloc>()),
         BlocProvider(create: (_) => di.sl<UserDetailsBloc>()),
         BlocProvider(create: (_) => di.sl<SettingsBloc>()),
+        BlocProvider(create: (_) => di.sl<OrgBloc>()),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
@@ -74,6 +76,7 @@ class _AuthenticatorAppState extends State<AuthenticatorApp> {
                 : ThemeMode.system,
             routerConfig: _router,
             debugShowCheckedModeBanner: false,
+            
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
@@ -270,6 +273,7 @@ class _AuthenticatorAppState extends State<AuthenticatorApp> {
                         }
                       },
                     ),
+                    
                   ],
                   child:
                       child!, // This 'child' is the current page from GoRouter

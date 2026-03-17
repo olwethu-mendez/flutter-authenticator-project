@@ -110,6 +110,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     bool parseBool(dynamic value) => value.toString().toLowerCase() == 'true';
 
+    List<String> _parseRoles(dynamic roleClaim) {
+      if (roleClaim == null) return [];
+      if (roleClaim is List) return roleClaim.map((e) => e.toString()).toList();
+      return [
+        roleClaim.toString(),
+      ]; // Handles case where it's just a single string
+    }
+
     return AuthAuthenticated(
       token: token,
       userId:
@@ -119,9 +127,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       username:
           decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
       email: decoded['email'] ?? "",
-      role:
-          decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ??
-          "General",
+      role: _parseRoles(
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+      ),
       isActivated: parseBool(decoded['IsActivated']),
       hasProfile: parseBool(decoded['HasProfile']),
       isDeactivated: parseBool(decoded['IsDeactivated']),
@@ -131,6 +139,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       preferredCommunication: _preferredType(
         decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
       ),
+      activeOrg: decoded['ActiveOrgId'],
     );
   }
 
@@ -193,22 +202,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final hasAccount = await authLocalDataSource.hasBiometricCredentials();
-    final isEnabledInSettings = await settingsLocalDataSource.getBiometricAuthSettings();
+    final isEnabledInSettings = await settingsLocalDataSource
+        .getBiometricAuthSettings();
 
     final LocalAuthentication auth = LocalAuthentication();
 
     final canAuthenticateWithBiometric = await auth.canCheckBiometrics;
     final isHardwareSupported = await auth.isDeviceSupported();
 
-    final List<BiometricType> availableBiometrics = await auth.getAvailableBiometrics();
+    final List<BiometricType> availableBiometrics = await auth
+        .getAvailableBiometrics();
     final hasEnrolledBiometrics = availableBiometrics.isNotEmpty;
 
-    final isAvailable = hasAccount && (isEnabledInSettings ?? false) &&
-                        (canAuthenticateWithBiometric || isHardwareSupported) && hasEnrolledBiometrics;
+    final isAvailable =
+        hasAccount &&
+        (isEnabledInSettings ?? false) &&
+        (canAuthenticateWithBiometric || isHardwareSupported) &&
+        hasEnrolledBiometrics;
 
-    emit(
-      BiometricAvailabilityChecked(isAvailable),
-    );
+    emit(BiometricAvailabilityChecked(isAvailable));
   }
 
   Future<void> _onAuthBiometricLoginRequested(
@@ -241,13 +253,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final result = await loginUseCase(LoginParams(loginEntity: loginEntity));
 
-      result.fold(
-        (failure) => emit(AuthError(message: failure.message)),
-        (authResult) {
-          _signalRService.initHub(); // 👈 ADD THIS
-           emit(_buildAuthenticatedState(authResult.token!));
-        },
-      );
+      result.fold((failure) => emit(AuthError(message: failure.message)), (
+        authResult,
+      ) {
+        _signalRService.initHub(); // 👈 ADD THIS
+        emit(_buildAuthenticatedState(authResult.token!));
+      });
     } catch (e) {
       emit(AuthError(message: "Biometric login failed: $e"));
     }
@@ -394,6 +405,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emailConfirmed: currentState.emailConfirmed,
           phoneConfirmed: currentState.phoneConfirmed,
           preferredCommunication: currentState.preferredCommunication,
+          activeOrg: currentState.activeOrg,
         ),
       );
     }

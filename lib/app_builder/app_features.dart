@@ -1,6 +1,9 @@
 import 'package:authentipass/features/auth/presentation/pages/banned_page.dart';
 import 'package:authentipass/features/auth/presentation/pages/login_page.dart';
 import 'package:authentipass/features/auth/presentation/pages/otp_page.dart';
+import 'package:authentipass/features/organisation/presentation/pages/create_organisation_page.dart';
+import 'package:authentipass/features/organisation/presentation/pages/organisation_dashboard_page.dart';
+import 'package:authentipass/features/organisation/presentation/pages/organisation_details_page.dart';
 import 'package:authentipass/features/profile/presentation/pages/change_email_page.dart';
 import 'package:authentipass/features/profile/presentation/pages/change_password_page.dart';
 import 'package:authentipass/features/profile/presentation/pages/change_phone_number_page.dart';
@@ -16,6 +19,7 @@ import 'package:authentipass/features/profile/presentation/pages/edit_profile_pa
 import 'package:authentipass/features/settings/presentation/pages/settings_page.dart';
 import 'package:authentipass/features/settings/presentation/pages/theme_settings_page.dart';
 import 'package:authentipass/features/user_details/presentation/pages/user_detail_page.dart';
+import 'package:authentipass/features/users_management/presentation/pages/create_user_page.dart';
 import 'package:authentipass/features/users_management/presentation/pages/user_management_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -89,6 +93,12 @@ class AppFeatures {
           path: '/home',
           builder: (context, state) => const HomeLayout(),
         ),
+        AppRoute(
+          name: 'create-user', 
+          path: '/create-user',
+          builder: (context, state) => const CreateUserPage(),
+        ),
+
       ]
     ),
     AppFeature(
@@ -155,6 +165,34 @@ class AppFeatures {
             // Now 'state' is available!
             final userId = state.pathParameters['userId']!;
             return UserDetailPage(userId: userId);
+          },
+        ),
+      ],
+    ),
+    AppFeature(
+      name: "Organisation",
+      routes: [
+        AppRoute(
+          name: 'get-organisations',
+          path: '/get-organisations',
+          builder: (context, state) {
+            return OrganisationDashboardPage();
+          },
+        ),
+        AppRoute(
+          name: 'create-organisation',
+          path: '/create-organisation',
+          builder: (context, state) {
+            return CreateOrganisationPage();
+          },
+        ),
+        AppRoute(
+          name: 'organisation-details',
+          path: '/organisation-details/:organisationId',
+          builder: (context, state) {
+            // Now 'state' is available!
+            final organisationId = state.pathParameters['organisationId']!;
+            return OrganisationDetailsPage(organisationId: organisationId);
           },
         ),
       ],

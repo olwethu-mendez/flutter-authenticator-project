@@ -7,6 +7,7 @@ import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dar
 import 'package:authentipass/features/profile/presentation/bloc/profile_event.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_state.dart';
 import 'package:authentipass/utilities/date_extensions.dart';
+import 'package:authentipass/utilities/list_string_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,12 +23,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String role = "";
+  String? activeOrganisation;
 
   @override
   void initState() {
     var authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      role = authState.role;
+      role = authState.role.toCommaSeparatedString();
+      activeOrganisation = authState.activeOrg;
     }
     super.initState();
   }
@@ -126,6 +129,10 @@ Future<void> _shareProfileLink(UserProfileModel profile) async {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
+              role,
+              style: const TextStyle(color: Colors.blueGrey),
+            ),
+            Text(
               profile.phoneNumber == profile.username ? "${profile.countryCode}${profile.username}" : profile.username ?? '',
               style: const TextStyle(color: Colors.grey),
             ),
@@ -169,6 +176,8 @@ Future<void> _shareProfileLink(UserProfileModel profile) async {
                   ? profile.gender!
                   : "${profile.gender} (${profile.genderSelfDescription})",
             ),
+            if(activeOrganisation != null)
+              _buildInfoTile(Icons.work, "Current Organisation", activeOrganisation!),
             _buildInfoTile(
               Icons.calendar_today,
               "Member Since",

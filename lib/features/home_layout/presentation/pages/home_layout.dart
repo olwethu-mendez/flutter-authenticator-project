@@ -6,11 +6,14 @@ import 'package:authentipass/features/auth/presentation/bloc/auth_event.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
 import 'package:authentipass/features/auth/presentation/pages/splash_page.dart';
 import 'package:authentipass/features/home/presentation/pages/home_page.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_event.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_state.dart';
+import 'package:authentipass/features/organisation/presentation/pages/organisation_dashboard_page.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_event.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_state.dart';
 import 'package:authentipass/features/profile/presentation/pages/profile_page.dart';
-import 'package:authentipass/features/users_management/presentation/pages/create_user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -26,21 +29,14 @@ class _HomeLayoutState extends State<HomeLayout> {
   late int _currentIndex;
   late final PageController _pageController;
 
+  late AuthState authState;
   List<Widget> get pages {
-  final state = context.read<AuthBloc>().state;
-  if (state is AuthAuthenticated && state.role == "Admin") {
-    return [HomePage(), CreateUserPage(), ProfilePage()];
+    return [HomePage(), OrganisationDashboardPage(), ProfilePage()];
   }
-  return [HomePage(), ProfilePage()];
-}
 
-List<String> get titles {
-  final state = context.read<AuthBloc>().state;
-  if (state is AuthAuthenticated && state.role == "Admin") {
-    return ["Home", "Create User", "User Profile"];
+  List<String> get titles {
+    return ["Home", "Organisation Dashboard", "User Profile"];
   }
-  return ["Home", "User Profile"];
-}
 
   @override
   void initState() {
@@ -49,8 +45,10 @@ List<String> get titles {
     // Fetch user profile when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileBloc>().add(FetchProfileRequested());
+      context.read<OrgBloc>().add(GetMyOrganisationsRequested());
     });
     _pageController = PageController(initialPage: _currentIndex);
+    authState = context.read<AuthBloc>().state;
   }
 
   @override
@@ -61,6 +59,11 @@ List<String> get titles {
 
   @override
   Widget build(BuildContext context) {
+    final currentPages = pages;
+    // Safety check: If current index is now out of bounds due to role change
+    if (_currentIndex >= currentPages.length) {
+      _currentIndex = 0;
+    }
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthUnauthenticated) {
@@ -77,9 +80,7 @@ List<String> get titles {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                titles.isNotEmpty
-                    ? titles[_currentIndex]
-                    : "Authenticator App",
+                titles.isNotEmpty ? titles[_currentIndex] : "Authenticator App",
               ),
               actions: [
                 IconButton(
@@ -128,12 +129,18 @@ List<String> get titles {
                         child: PageView(
                           controller: _pageController,
                           physics: const NeverScrollableScrollPhysics(),
-                          children: profileState is ProfileError ? [_profileError(context, profileState)]
+                          children: profileState is ProfileError
+                              ? [_profileError(context, profileState)]
                               : (profileState is ProfileLoaded)
-                              ? [Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            child: pages[_currentIndex],
-                          )]
+                              ? [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    child: pages[_currentIndex],
+                                  ),
+                                ]
                               : [],
                           onPageChanged: (index) {
                             // This keeps the internal state in sync if the controller moves
@@ -141,13 +148,25 @@ List<String> get titles {
                               setState(() => _currentIndex = index);
                             }
                           },
-                        )
+                        ),
                       ),
                     ],
                   );
                 },
               ),
             ),
+            floatingActionButton:
+                (authState is AuthAuthenticated &&
+                    authState.role.contains("Admin") &&
+                    _currentIndex != 1)
+                ? FloatingActionButton(
+                    onPressed: () => context.push("/create-user"),
+                    child: Icon(Icons.person_add_alt_1),
+                  )
+                : FloatingActionButton(
+                    onPressed: () => context.push('/create-organisation'),
+                    child:Icon(Icons.add_home_work)
+                  ),
             bottomNavigationBar: _buildBottomNavigationBar(),
           );
         },
@@ -224,8 +243,8 @@ List<String> get titles {
               icon: Icon(
                 title == "Home"
                     ? Icons.home_outlined
-                    : title == "Create User"
-                    ? Icons.person_add_alt_1
+                    : title == "Organisation Dashboard"
+                    ? Icons.maps_home_work_outlined
                     : Icons.person_outline,
               ),
               label: title,
@@ -295,7 +314,9 @@ List<String> get titles {
                             ? () {
                                 Navigator.pop(context);
                                 setState(() {
-                                  _currentIndex = state.role == "Admin" ? 2 : 1;
+                                  _currentIndex = state.role.contains("Admin")
+                                      ? 2
+                                      : 1;
                                 });
                                 // Link onTap to the PageController
                                 _pageController.animateToPage(
@@ -354,6 +375,83 @@ List<String> get titles {
 
                     if (profileState is ProfileLoaded)
                       const SizedBox(height: 32),
+
+                    // inside your Drawer or Profile page
+                    ListTile(
+                      leading: const Icon(Icons.business_center_outlined),
+                      title: const Text("Manage Organisations"),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/get-organisations');
+                      },
+                    ),
+                    const Divider(),
+                    BlocBuilder<OrgBloc, OrgState>(
+                      builder: (context, state) {
+                        if (state is OrgLoading)
+                          return const Center(child: LinearProgressIndicator());
+                        if (state is OrgLoaded &&
+                            state.myOrganisations != null) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  "Switch Organisation",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                              ...state.myOrganisations!.map((org) {
+                                // Compare against AuthBloc's activeOrg
+                                final authState = context
+                                    .read<AuthBloc>()
+                                    .state;
+                                bool isActive = false;
+                                if (authState is AuthAuthenticated) {
+                                  isActive =
+                                      org.organizationId == authState.activeOrg;
+                                }
+
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      org.organizationImageUrl ??
+                                          'https://placehold.co/100',
+                                    ),
+                                  ),
+                                  title: Text(org.name ?? "Unknown"),
+                                  trailing: isActive
+                                      ? const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                        )
+                                      : null,
+                                  onTap: isActive
+                                      ? null
+                                      : () {
+                                          context.read<OrgBloc>().add(
+                                            SwitchOrganisationRequested(
+                                              org.organizationId ?? "",
+                                            ),
+                                          );
+                                          Navigator.pop(context);
+                                        },
+                                );
+                              }),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
 
                     // Menu items
                     if (profileState is ProfileLoaded &&

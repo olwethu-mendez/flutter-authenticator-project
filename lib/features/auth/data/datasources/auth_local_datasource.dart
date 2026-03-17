@@ -17,6 +17,8 @@ abstract class AuthLocalDataSource {
   Future<void> clearBiometricCountryCode();
   Future<void> clearBiometricCredentials();
   Future<bool> hasBiometricCredentials();
+  Future<void> cacheActiveOrgId(String orgId);
+  Future<String?> getActiveOrgId();
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource{
@@ -29,6 +31,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource{
   static const String cachedBiometricUsername = 'CACHED_BIOMETRIC_USERNAME';
   static const String cachedBiometricPassword = 'CACHED_BIOMETRIC_PASSWORD';
   static const String cachedBiometricCountryCode = 'CACHED_BIOMETRIC_COUNTRY_CODE';
+  static const String activeOrganisationId = 'ACTIVE_ORG_ID';
 
   AuthLocalDataSourceImpl({required this.sharedPreferences, required this.secureStorage});
 
@@ -112,5 +115,15 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource{
   Future<bool> hasBiometricCredentials() async {
     final username = await secureStorage.read(key: cachedBiometricUsername);
     return username != null && username.isNotEmpty;
+  }// Implementation
+
+  @override
+  Future<void> cacheActiveOrgId(String orgId) async {
+    await sharedPreferences.setString(activeOrganisationId, orgId);
+  }
+
+  @override
+  Future<String?> getActiveOrgId() async {
+    return sharedPreferences.getString(activeOrganisationId);
   }
 }

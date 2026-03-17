@@ -18,7 +18,7 @@ class AuthAuthenticated extends AuthState {
   final String userId; // Add this field
   final String email;
   final String username;
-  final String role;
+  final List<String> role;
   final bool isActivated;
   final bool hasProfile;
   final bool isDeactivated;
@@ -26,6 +26,7 @@ class AuthAuthenticated extends AuthState {
   final bool emailConfirmed;
   final bool phoneConfirmed;
   final String preferredCommunication;
+  final String? activeOrg;
 
   const AuthAuthenticated({
     required this.token,
@@ -40,10 +41,11 @@ class AuthAuthenticated extends AuthState {
     required this.emailConfirmed,
     required this.phoneConfirmed,
     required this.preferredCommunication,
+    this.activeOrg,
   });
 
   @override
-  List<Object?> get props => [token, userId, email, username, role, isActivated, hasProfile, isDeactivated, isDeactivatedByAdmin, emailConfirmed, phoneConfirmed, preferredCommunication];
+  List<Object?> get props => [token, userId, email, username, role, isActivated, hasProfile, isDeactivated, isDeactivatedByAdmin, emailConfirmed, phoneConfirmed, preferredCommunication, activeOrg];
 }
 class AuthProfileCreationRequired extends AuthState {
   // New State: Token exists, but profile is missing

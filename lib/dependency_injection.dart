@@ -11,6 +11,10 @@ import 'package:authentipass/features/auth/data/repository/auth_repository_impl.
 import 'package:authentipass/features/auth/domain/repository/auth_repository.dart';
 import 'package:authentipass/features/auth/domain/usecases/check_auth_usecase.dart';
 import 'package:authentipass/features/auth/domain/usecases/confirm_email_usecase.dart';
+import 'package:authentipass/features/organisation/data/datasource/organisation_remote_datasource.dart';
+import 'package:authentipass/features/organisation/data/repository/organisation_repository_impl.dart';
+import 'package:authentipass/features/organisation/domain/repository/organisation_repository.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
 import 'package:authentipass/features/profile/domain/usecases/confirm_email_usecase.dart' as pr;
 import 'package:authentipass/features/auth/domain/usecases/confirm_forgot_password_usecase.dart';
 import 'package:authentipass/features/auth/domain/usecases/confirm_phone_usecase.dart';
@@ -134,6 +138,13 @@ sl.registerFactory(() => SettingsBloc(
 
   sl.registerFactory(() => ThemeBloc(sharedPreferences: sl()));
 
+sl.registerFactory(() => OrgBloc(
+  repository: sl(),
+  localDataSource: sl(),
+  authBloc: sl(),
+));
+
+
   // 2. USE CASES
   // We use registerLazySingleton because UseCases can be reused.
   sl.registerLazySingleton(() => CheckAuthUseCase(repository: sl()));
@@ -212,6 +223,7 @@ sl.registerFactory(() => SettingsBloc(
     () => SettingsRepositoryImpl(localDataSource: sl()),
   );
   
+  sl.registerLazySingleton<OrganisationRepository>(() => OrganisationRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()));
 
   // 4. DATA SOURCES
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -254,6 +266,8 @@ sl.registerFactory(() => SettingsBloc(
       sharedPreferences: sl(),
     ),
   );
+
+  sl.registerLazySingleton<OrganisationRemoteDataSource>(() => OrganisationRemoteDataSourceImpl(dio: sl()));
 
   // ! External Dependencies (Third-party libraries)
   ////! Core
