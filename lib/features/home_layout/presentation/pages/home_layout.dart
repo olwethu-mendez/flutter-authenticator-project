@@ -314,9 +314,7 @@ class _HomeLayoutState extends State<HomeLayout> {
                             ? () {
                                 Navigator.pop(context);
                                 setState(() {
-                                  _currentIndex = state.role.contains("Admin")
-                                      ? 2
-                                      : 1;
+                                  _currentIndex = 2;
                                 });
                                 // Link onTap to the PageController
                                 _pageController.animateToPage(

@@ -7,6 +7,7 @@ import 'package:authentipass/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_event.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
 import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_state.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_state.dart';
 import 'package:authentipass/features/settings/presentation/bloc/settings_bloc.dart';
@@ -243,6 +244,18 @@ class _AuthenticatorAppState extends State<AuthenticatorApp> {
                           );
                           context.read<SettingsBloc>().add(
                             ResetSettingsFlagsEvent(),
+                          );
+                        }
+                      },
+                    ),
+                    // 4. Settings Error
+                    BlocListener<OrgBloc, OrgState>(
+                      listener: (context, state) {
+                        if (state is OrgError) {
+                          _showGlobalSnackBar(
+                            context,
+                            state.message,
+                            Colors.orange,
                           );
                         }
                       },

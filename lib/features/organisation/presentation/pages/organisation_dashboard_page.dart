@@ -1,3 +1,5 @@
+import 'package:auth_shared/widget/library.dart';
+import 'package:authentipass/features/organisation/data/models/get_organisations_model.dart';
 import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
 import 'package:authentipass/features/organisation/presentation/bloc/org_event.dart';
 import 'package:authentipass/features/organisation/presentation/bloc/org_state.dart';
@@ -26,8 +28,7 @@ class _OrganisationDashboardPageState extends State<OrganisationDashboardPage>
       vsync: this,
     ); // Make sure vsync is correct
     // Fetch everything on load
-    context.read<OrgBloc>().add(GetMyOrganisationsRequested());
-    context.read<OrgBloc>().add(GetPublicOrganisationsRequested());
+    context.read<OrgBloc>().add(GetAllOrganisationsRequested());
   }
 
   @override
@@ -41,7 +42,7 @@ class _OrganisationDashboardPageState extends State<OrganisationDashboardPage>
     return Scaffold(
       body: Column(
         children: [
-           TabBar(
+          TabBar(
             controller: _tabController, // Set the controller here
             //labelColor: Colors.white,
             tabs: [
@@ -77,30 +78,22 @@ class OrganisationListWidget extends StatelessWidget {
         if (state is OrgLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (state is OrgError) return Center(child: Text(state.message));
 
         if (state is OrgLoaded) {
           List<dynamic> displayList = [];
+          final activeOrgId = state.activeOrgId;
 
           if (type == OrgFetchType.managed) {
-            displayList =
-                state.myOrganisations
-                    ?.where((o) => o.isAdmin == true)
-                    .toList() ??
-                [];
+            displayList = state.myOrganisations?.toList() ?? [];
           } else if (type == OrgFetchType.joined) {
-            displayList =
-                state.myOrganisations
-                    ?.where((o) => o.isAdmin == false)
-                    .toList() ??
-                [];
+            displayList = state.organisations?.toList() ?? [];
           } else {
             displayList = state.publicOrganisations ?? [];
           }
           // Debug Print: Check if the list actually has items before the empty check
           print("Display List Length for $type: ${displayList.length}");
 
-          if (type == OrgFetchType.managed || type == OrgFetchType.joined) {
+          if (type == OrgFetchType.managed) {
             if (displayList.isEmpty) {
               return Expanded(
                 child: Center(
@@ -112,6 +105,26 @@ class OrganisationListWidget extends StatelessWidget {
                       TextButton(
                         onPressed: () => context.read<OrgBloc>().add(
                           GetMyOrganisationsRequested(),
+                        ),
+                        child: Text("Refresh"),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          } else if (type == OrgFetchType.joined) {
+            if (displayList.isEmpty) {
+              return Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey),
+                      Text("No organisations found in ${type.name}"),
+                      TextButton(
+                        onPressed: () => context.read<OrgBloc>().add(
+                          GetOrganisationsRequested(),
                         ),
                         child: Text("Refresh"),
                       ),
@@ -148,7 +161,7 @@ class OrganisationListWidget extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final org = displayList[index];
-              return _buildOrgCard(context, org);
+              return _buildOrgCard(context, org, activeOrgId);
             },
           );
         }
@@ -157,7 +170,7 @@ class OrganisationListWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildOrgCard(BuildContext context, dynamic org) {
+  Widget _buildOrgCard(BuildContext context, dynamic org, String? activeOrgId) {
     //final bool isPublicTab = type == OrgFetchType.public;
 
     return Card(
@@ -178,7 +191,7 @@ class OrganisationListWidget extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(org.subdomain ?? ""),
-        trailing: _buildTrailing(context, org),
+        trailing: _buildTrailing(context, org, activeOrgId),
         onTap: () {
           final orgId = org.organizationId;
           if (orgId != null && orgId.isNotEmpty) {
@@ -192,20 +205,63 @@ class OrganisationListWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTrailing(BuildContext context, dynamic org) {
-    if (type == OrgFetchType.joined) {
-      // In a real scenario, you'd check a 'hasAccepted' flag from the backend
-      // For now, let's provide the Switch option as the default "Acceptance" action
-      return ElevatedButton(
-        onPressed: () {
-          context.read<OrgBloc>().add(
-            AcceptInvitationRequested(org.organizationId!, true),
-          );
-        },
-        child: const Text("Accept"),
+  Widget _buildTrailing(
+    BuildContext context,
+    dynamic org,
+    String? activeOrgId,
+  ) {
+    if (type == OrgFetchType.joined && org is GetOrganisationsModel) {
+      if (org.invitationAccepted == null) {
+        return ElevatedButton(
+          onPressed: () {
+            context.read<OrgBloc>().add(
+              AcceptInvitationRequested(org.organizationId!, true),
+            );
+          },
+          child: const Text("Accept"),
+        );
+      }
+      return InkWell(
+        onTap: (activeOrgId == null || activeOrgId != org.organizationId)
+            ? () {
+                List<Widget> items = [
+                  ListTile(
+                    leading: Icon(Icons.repeat_rounded),
+                    title: Text("Switch to ${org.name ?? "this Organisation"}"),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.read<OrgBloc>().add(
+                        SwitchOrganisationRequested(org.organizationId!),
+                      );
+                    },
+                    trailing: Icon(Icons.chevron_right),
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(Icons.open_in_new),
+                    title: Text("Open ${org.name ?? "this Organisation"}"),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push(
+                        '/organisation-details/${org.organizationId}',
+                      );
+                    },
+                    trailing: Icon(Icons.chevron_right),
+                  ),
+                ];
+                CustomModalBottomSheet.show(
+                  context: context,
+                  title: "Choose action for ${org.name ?? "this organisation"}",
+                  child: SingleChildScrollView(child: Column(children: items)),
+                  isScrollControlled: true,
+                );
+              }
+            : null,
+        child: Icon(Icons.chevron_right),
       );
+    } else {
+      return Icon(Icons.chevron_right);
     }
-    return const Icon(Icons.chevron_right);
   }
 }
 

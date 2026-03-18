@@ -2,6 +2,7 @@ import 'package:authentipass/core/error/exceptions.dart';
 import 'package:authentipass/core/error/failures.dart';
 import 'package:authentipass/features/users_management/data/datasource/users_remote_datasource.dart';
 import 'package:authentipass/features/users_management/data/models/create_user_model.dart';
+import 'package:authentipass/features/users_management/data/models/users_filtered_list_model.dart';
 import 'package:authentipass/features/users_management/data/models/users_list_model.dart';
 import 'package:authentipass/features/users_management/domain/entities/create_user_entity.dart';
 import 'package:authentipass/features/users_management/domain/repository/users_repository.dart';
@@ -32,6 +33,24 @@ class UsersRepositoryImpl implements UsersRepository {
   }
 
   @override
+  Future<Either<Failure, List<UsersFilteredListModel>>> getFilteredUsers(String? fullName, String? email, String? phoneNumebr) async {
+    try{
+      final users = await remoteDataSource.getFilteredUsers(fullName, email, phoneNumebr);
+      return Right(users);
+    } on InvalidRequestException catch (e) {
+      return Left(InvalidRequestFailure(e.message ?? "Invalid request"));
+    } on InvalidCredentialsExceptions catch (e) {
+      return Left(
+        InvalidCredentialsFailure(
+          e.message ?? "Invalid credentials or unauthorized",
+        ),
+      );
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message ?? "Server error"));
+    }
+  }  
+
+  @override
   Future<Either<Failure, void>> createUser(CreateUserEntity createUser) async {
     try{
       var createUserModel = CreateUserModel(firstName: createUser.firstName, lastName: createUser.lastName, gender: createUser.gender, email: createUser.email, countryCode: createUser.countryCode, phoneNumber: createUser.phoneNumber, prefersEmail: createUser.prefersEmail,);
@@ -49,5 +68,5 @@ class UsersRepositoryImpl implements UsersRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message ?? "Server error"));
     }
-  }  
+  }
 }

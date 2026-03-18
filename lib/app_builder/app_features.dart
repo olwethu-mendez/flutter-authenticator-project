@@ -2,6 +2,7 @@ import 'package:authentipass/features/auth/presentation/pages/banned_page.dart';
 import 'package:authentipass/features/auth/presentation/pages/login_page.dart';
 import 'package:authentipass/features/auth/presentation/pages/otp_page.dart';
 import 'package:authentipass/features/organisation/presentation/pages/create_organisation_page.dart';
+import 'package:authentipass/features/organisation/presentation/pages/invite_member_page.dart';
 import 'package:authentipass/features/organisation/presentation/pages/organisation_dashboard_page.dart';
 import 'package:authentipass/features/organisation/presentation/pages/organisation_details_page.dart';
 import 'package:authentipass/features/profile/presentation/pages/change_email_page.dart';
@@ -193,6 +194,14 @@ class AppFeatures {
             // Now 'state' is available!
             final organisationId = state.pathParameters['organisationId']!;
             return OrganisationDetailsPage(organisationId: organisationId);
+          },
+        ),
+        AppRoute(
+          name: 'invite-member',
+          path: '/invite-member',
+          builder: (context, state) {
+            // Now 'state' is available!
+            return InviteMemberPage();
           },
         ),
       ],

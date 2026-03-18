@@ -10,16 +10,19 @@ class GetOrganisationModel extends Equatable {
     required this.organizationImageUrl,
     required this.organizationHeaderImageUrl,
     required this.status,
+    required this.isAdmin,
+    required this.invitationAccepted,
   });
   final String? organizationId;
   final String? name;
   final String? description;
   final String? subdomain;
   final bool? isPublic;
+  final bool? isAdmin;
+  final bool? invitationAccepted;
   final String? organizationImageUrl;
   final String? organizationHeaderImageUrl;
   final String? status;
-
   @override
   List<Object?> get props => [
     organizationId,
@@ -39,6 +42,8 @@ class GetOrganisationModel extends Equatable {
       description: json['description'] as String?,
       subdomain: json['subdomain'] as String?,
       isPublic: json['isPublic'] as bool?,
+      isAdmin: json['isAdmin'] as bool?,
+      invitationAccepted: json['invitationAccepted'] as bool?,
       organizationImageUrl: json['organizationImageUrl'] as String?,
       organizationHeaderImageUrl: json['organizationHeaderImageUrl'] as String?,
       status: json['status'] as String?,
@@ -51,6 +56,8 @@ class GetOrganisationModel extends Equatable {
       'name': name,
       'description': description,
       'subdomain': subdomain,
+      'isAdmin': isAdmin.toString(),
+      'invitationAccepted': invitationAccepted.toString(),
       'isPublic': isPublic.toString(),
       'organizationImageUrl': organizationImageUrl,
       'organizationHeaderImageUrl': organizationHeaderImageUrl,

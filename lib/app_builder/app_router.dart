@@ -44,7 +44,7 @@ class AppRouter {
         final bool isLoggingIn = location == '/login';
         final bool isRegistering = location == '/register';
         final bool isOnSplash = location == '/';
-        final bool hasCreatedOrganisations = location == '/create-organisation';
+        //final bool hasCreatedOrganisations = location == '/create-organisation';
 
         // 1. ALLOW INITIALIZATION
         // If we are in Initial/Loading, ONLY return null if we are already on the Splash screen.

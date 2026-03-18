@@ -7,10 +7,16 @@ import 'package:authentipass/features/organisation/data/models/get_organisations
 import 'package:dio/dio.dart';
 
 abstract class OrganisationRemoteDataSource {
-  Future<AuthResultsModel> createOrganisation(CreateOrganisationModel createOrganisation);
+  Future<AuthResultsModel> createOrganisation(
+    CreateOrganisationModel createOrganisation,
+  );
   Future<void> inviteUserToOrganisation(String profileId);
-  Future<AuthResultsModel> acceptInvitation(String organisationId, bool invitationAccepted);
+  Future<AuthResultsModel> acceptInvitation(
+    String organisationId,
+    bool invitationAccepted,
+  );
   Future<List<GetMyOrganisationModel>> getMyOrganisations();
+  Future<List<GetOrganisationsModel>> getOrganisations();
   Future<List<GetOrganisationsModel>> getPublicOrganisations();
   Future<GetOrganisationModel> getOrganisation(String organisationId);
   Future<AuthResultsModel> switchOrganisation(String organisationId);
@@ -43,7 +49,7 @@ class OrganisationRemoteDataSourceImpl implements OrganisationRemoteDataSource {
     }
   }
 
-  // Inside OrganisationRemoteDataSourceImpl  
+  // Inside OrganisationRemoteDataSourceImpl
   @override
   Future<List<GetMyOrganisationModel>> getMyOrganisations() async {
     try {
@@ -55,18 +61,44 @@ class OrganisationRemoteDataSourceImpl implements OrganisationRemoteDataSource {
       rethrow;
     }
   }
-  
+
   @override
   Future<GetOrganisationModel> getOrganisation(String organisationId) async {
     try {
-      final res = await dio.get('/organisation/get-organisation/$organisationId');
+      final res = await dio.get(
+        '/organisation/get-organisation/$organisationId',
+      );
       return GetOrganisationModel.fromJson(res.data);
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
     }
   }
-  
+
+  // @override
+  // Future<List<GetOrganisationModel>> getOrganisations() async {
+  //   try {
+  //     final res = await dio.get('/organisation/get-organisations');
+  //     final List<dynamic> data = res.data;
+  //     return data.map((json) => GetOrganisationModel.fromJson(json)).toList();
+  //   } on DioException catch (e) {
+  //     _handleError(e);
+  //     rethrow;
+  //   }
+  // }
+
+  @override
+  Future<List<GetOrganisationsModel>> getOrganisations() async {
+    try {
+      final res = await dio.get('/organisation/get-organisations');
+      final List<dynamic> data = res.data;
+      return data.map((json) => GetOrganisationsModel.fromJson(json)).toList();
+    } on DioException catch (e) {
+      _handleError(e);
+      rethrow;
+    }
+  }
+
   @override
   Future<List<GetOrganisationsModel>> getPublicOrganisations() async {
     try {
@@ -78,57 +110,70 @@ class OrganisationRemoteDataSourceImpl implements OrganisationRemoteDataSource {
       rethrow;
     }
   }
-  
+
   @override
   Future<AuthResultsModel> switchOrganisation(String organisationId) async {
     try {
-      final res = await dio.post('/organisation/switch-organisation/$organisationId');
+      final res = await dio.post(
+        '/organisation/switch-organisation/$organisationId',
+      );
       return AuthResultsModel.fromJson(res.data);
     } on DioException catch (e) {
       _handleError(e);
-      rethrow;      
+      rethrow;
     }
   }
-  
+
   @override
-  Future<AuthResultsModel> acceptInvitation(String organisationId, bool invitationAccepted) async {
+  Future<AuthResultsModel> acceptInvitation(
+    String organisationId,
+    bool invitationAccepted,
+  ) async {
     try {
-      final res = await dio.put('/organisation/accept-invitation?organisationId=$organisationId&invitationAccepted=$invitationAccepted');
+      final res = await dio.put(
+        '/organisation/accept-invitation?organisationId=$organisationId&invitationAccepted=$invitationAccepted',
+      );
       return AuthResultsModel.fromJson(res.data);
     } on DioException catch (e) {
       _handleError(e);
-      rethrow;      
+      rethrow;
     }
-    
   }
-  
+
   @override
-  Future<AuthResultsModel> createOrganisation(CreateOrganisationModel createOrganisation) async {
-    try {// Create FormData for Multipart upload
+  Future<AuthResultsModel> createOrganisation(
+    CreateOrganisationModel createOrganisation,
+  ) async {
+    try {
+      // Create FormData for Multipart upload
       final formData = FormData.fromMap({
         'Name': createOrganisation.name,
         'Description': createOrganisation.description,
         'IsPublic': createOrganisation.isPublic,
         if (createOrganisation.organizationImage != null)
-          'OrganizationImage': await MultipartFile.fromFile(createOrganisation.organizationImage!.path),
+          'OrganizationImage': await MultipartFile.fromFile(
+            createOrganisation.organizationImage!.path,
+          ),
         if (createOrganisation.organizationHeaderImage != null)
-          'OrganizationHeaderImage': await MultipartFile.fromFile(createOrganisation.organizationHeaderImage!.path),
+          'OrganizationHeaderImage': await MultipartFile.fromFile(
+            createOrganisation.organizationHeaderImage!.path,
+          ),
       });
       final res = await dio.post('/organisation/create', data: formData);
       return AuthResultsModel.fromJson(res.data);
     } on DioException catch (e) {
       _handleError(e);
-      rethrow;      
+      rethrow;
     }
   }
-  
+
   @override
   Future<void> inviteUserToOrganisation(String profileId) async {
     try {
       await dio.post('/organisation/invitation?profileId=$profileId');
     } on DioException catch (e) {
       _handleError(e);
-      rethrow;      
+      rethrow;
     }
   }
 }

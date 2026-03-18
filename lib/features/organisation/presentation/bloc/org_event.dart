@@ -11,6 +11,18 @@ class GetMyOrganisationsRequested extends OrgEvent {}
 
 class GetPublicOrganisationsRequested extends OrgEvent {}
 
+class GetOrganisationsRequested extends OrgEvent {}
+class GetAllOrganisationsRequested extends OrgEvent {}
+class GetInvitableUsersRequested extends OrgEvent {
+  final String? fullName;
+  final String? email;
+  final String? phoneNumber;
+
+  const GetInvitableUsersRequested(this.fullName, this.email, this.phoneNumber);   
+}
+
+class ClearOrgSearchRequested extends OrgEvent{}
+
 class GetOrganisationRequested extends OrgEvent {
   final String organisationId;
   const GetOrganisationRequested(this.organisationId);

@@ -51,6 +51,24 @@ class OrganisationRepositoryImpl implements OrganisationRepository {
       return Left(ServerFailure(e.message ?? "Server error"));
     }
   }
+  
+  @override
+  Future<Either<Failure, List<GetOrganisationsModel>>> getOrganisations() async {
+    try{
+      final organisation = await remoteDataSource.getOrganisations();
+      return Right(organisation);
+    } on InvalidRequestException catch(e){
+      return Left(InvalidRequestFailure(e.message ?? "Invalid request"));
+    } on InvalidCredentialsExceptions catch (e) {
+      return Left(
+        InvalidCredentialsFailure(
+          e.message ?? "Invalid credentials or unauthorized",
+        ),
+      );
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message ?? "Server error"));
+    }
+  }
 
   @override
   Future<Either<Failure, List<GetOrganisationsModel>>> getPublicOrganisations() async {

@@ -12,6 +12,7 @@ abstract class OrganisationRepository {
   Future<Either<Failure,AuthResultsModel>> acceptInvitation(String organisationId, bool invitationAccepted);
   Future<Either<Failure,List<GetMyOrganisationModel>>> getMyOrganisations();
   Future<Either<Failure,List<GetOrganisationsModel>>> getPublicOrganisations();
+  Future<Either<Failure,List<GetOrganisationsModel>>> getOrganisations();
   Future<Either<Failure,GetOrganisationModel>> getOrganisation(String organisationId);
   Future<Either<Failure,AuthResultsModel>> switchOrganisation(String organisationId);
 }

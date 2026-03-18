@@ -15,7 +15,8 @@ import 'package:authentipass/features/organisation/data/datasource/organisation_
 import 'package:authentipass/features/organisation/data/repository/organisation_repository_impl.dart';
 import 'package:authentipass/features/organisation/domain/repository/organisation_repository.dart';
 import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
-import 'package:authentipass/features/profile/domain/usecases/confirm_email_usecase.dart' as pr;
+import 'package:authentipass/features/profile/domain/usecases/confirm_email_usecase.dart'
+    as pr;
 import 'package:authentipass/features/auth/domain/usecases/confirm_forgot_password_usecase.dart';
 import 'package:authentipass/features/auth/domain/usecases/confirm_phone_usecase.dart';
 import 'package:authentipass/features/auth/domain/usecases/forgot_password_usecase.dart';
@@ -73,77 +74,83 @@ import 'package:shared_preferences/shared_preferences.dart';
 final sl = GetIt.instance; // sl = Service Locator
 
 Future<void> init() async {
-  
   // ! Features - Auth
-  
+
   // 1. BLOC
-  // We use registerFactory because Blocs should be disposed after use. 
+  // We use registerFactory because Blocs should be disposed after use.
   // Each time we request a Bloc, we get a fresh instance.
   sl.registerFactory(
     () => AuthBloc(
-      checkAuthUseCase: sl(),       // sl() automatically finds the registered CheckAuthUseCase
-      loginUseCase: sl(),           // sl() finds LoginUseCases
+      checkAuthUseCase:
+          sl(), // sl() automatically finds the registered CheckAuthUseCase
+      loginUseCase: sl(), // sl() finds LoginUseCases
       logoutUseCase: sl(),
       refreshTokenUseCase: sl(),
       registerUseCase: sl(),
       authLocalDataSource: sl(),
       confirmEmailUsecase: sl(),
       confirmPhoneUsecase: sl(),
-      resendOtpUsecase: sl(), 
+      resendOtpUsecase: sl(),
       forgotPasswordUsecase: sl(),
       confirmForgotPasswordUsecase: sl(),
       settingsLocalDataSource: sl(),
       signalRService: sl(), // Add this
-    ));
+    ),
+  );
 
-  sl.registerFactory(() => ProfileBloc(
-    createProfileUseCase: sl(),
-    getProfileUseCase: sl(),
-    updateProfilePictureUseCase: sl(),
-    updateProfileUseCase: sl(),
-    activateProfileUseCase: sl(),
-    deactivateProfileUseCase: sl(), authLocalDataSource: sl(), settingsLocalDataSource: sl(),
-    updateEmailUseCase: sl(),
-    updatePhoneNumberUsecase: sl(),
-    verifyCodeUsecase: sl(),
-    changePasswordUsecase: sl(),
-    setPreferredContactModeUsecase: sl(),
-    confirmEmailUsecase: sl(),
-    confirmPhoneNumberUsecase: sl(),
-  ));
-    
-sl.registerFactory(() => UsersBloc(
-  getUsersUsecase: sl(),
-  createUserUsecase: sl(),
-));
+  sl.registerFactory(
+    () => ProfileBloc(
+      createProfileUseCase: sl(),
+      getProfileUseCase: sl(),
+      updateProfilePictureUseCase: sl(),
+      updateProfileUseCase: sl(),
+      activateProfileUseCase: sl(),
+      deactivateProfileUseCase: sl(),
+      authLocalDataSource: sl(),
+      settingsLocalDataSource: sl(),
+      updateEmailUseCase: sl(),
+      updatePhoneNumberUsecase: sl(),
+      verifyCodeUsecase: sl(),
+      changePasswordUsecase: sl(),
+      setPreferredContactModeUsecase: sl(),
+      confirmEmailUsecase: sl(),
+      confirmPhoneNumberUsecase: sl(),
+    ),
+  );
 
-sl.registerFactory(() => UsersViewBloc(
-  getViewUsecase: sl(),
-  setViewUsecase: sl()
-));
+  sl.registerFactory(
+    () => UsersBloc(getUsersUsecase: sl(), createUserUsecase: sl()),
+  );
 
-sl.registerFactory(() => UserDetailsBloc(
-    getSingleUserUsecase: sl(),
-    adminDeactivatesUserUsecase: sl(),
+  sl.registerFactory(
+    () => UsersViewBloc(getViewUsecase: sl(), setViewUsecase: sl()),
+  );
+
+  sl.registerFactory(
+    () => UserDetailsBloc(
+      getSingleUserUsecase: sl(),
+      adminDeactivatesUserUsecase: sl(),
       signalRService: sl(), // Add this
-  ),
-);
+    ),
+  );
 
-sl.registerFactory(() => SettingsBloc(
-    getBiometricSettingsUsecase: sl(),
-    setBiometricSettingsUsecase: sl(),
-  ),
-);
-
+  sl.registerFactory(
+    () => SettingsBloc(
+      getBiometricSettingsUsecase: sl(),
+      setBiometricSettingsUsecase: sl(),
+    ),
+  );
 
   sl.registerFactory(() => ThemeBloc(sharedPreferences: sl()));
 
-sl.registerFactory(() => OrgBloc(
-  repository: sl(),
-  localDataSource: sl(),
-  authBloc: sl(),
-));
-
+  sl.registerFactory(
+    () => OrgBloc(
+      repository: sl(),
+      localDataSource: sl(),
+      authBloc: sl(),
+      userRepository: sl(),
+    ),
+  );
 
   // 2. USE CASES
   // We use registerLazySingleton because UseCases can be reused.
@@ -152,13 +159,15 @@ sl.registerFactory(() => OrgBloc(
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
   sl.registerLazySingleton(() => RefreshTokenUseCases(repository: sl()));
   sl.registerLazySingleton(() => RegisterUseCases(repository: sl()));
-  
+
   sl.registerLazySingleton(() => ConfirmEmailUsecase(repository: sl()));
   sl.registerLazySingleton(() => ConfirmPhoneUsecase(repository: sl()));
   sl.registerLazySingleton(() => ResendOtpUsecase(repository: sl()));
   sl.registerLazySingleton(() => ForgotPasswordUsecase(repository: sl()));
-  sl.registerLazySingleton(() => ConfirmForgotPasswordUsecase(repository: sl()));
-  
+  sl.registerLazySingleton(
+    () => ConfirmForgotPasswordUsecase(repository: sl()),
+  );
+
   sl.registerLazySingleton(() => CreateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfilePictureUseCase(sl()));
@@ -185,8 +194,6 @@ sl.registerFactory(() => OrgBloc(
   sl.registerLazySingleton(() => ConfirmPhoneNumberUsecase(sl()));
   sl.registerLazySingleton(() => pr.ConfirmEmailUsecase(sl()));
 
-
-
   // 3. REPOSITORY
   // Abstract Class -> Implementation Class
   sl.registerLazySingleton<AuthRepository>(
@@ -196,78 +203,66 @@ sl.registerFactory(() => OrgBloc(
     ),
   );
 
-  sl.registerLazySingleton<ProfileRepository>(()=>
-  ProfileRepositoryImpl(
-    remoteDataSource: sl(),
-    localDataSource: sl(),
-  ));
-  
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+  );
 
-  sl.registerLazySingleton<UsersRepository>(()=>
-  UsersRepositoryImpl(
-    remoteDataSource: sl(),
-  ));
+  sl.registerLazySingleton<UsersRepository>(
+    () => UsersRepositoryImpl(remoteDataSource: sl()),
+  );
 
-  
-  sl.registerLazySingleton<UsersViewRepository>(()=>
-  UsersViewRepositoryImpl(
-    localDataSource: sl(),
-  ));
+  sl.registerLazySingleton<UsersViewRepository>(
+    () => UsersViewRepositoryImpl(localDataSource: sl()),
+  );
 
-  
-
-  sl.registerLazySingleton<UserDetailsRepository>(()=>
-  UserDetailsRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<UserDetailsRepository>(
+    () => UserDetailsRepositoryImpl(remoteDataSource: sl()),
+  );
 
   sl.registerLazySingleton<SettingsRepository>(
     () => SettingsRepositoryImpl(localDataSource: sl()),
   );
-  
-  sl.registerLazySingleton<OrganisationRepository>(() => OrganisationRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()));
+
+  sl.registerLazySingleton<OrganisationRepository>(
+    () => OrganisationRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      
+    ),
+  );
 
   // 4. DATA SOURCES
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(
-      dio: sl(),
-    ),
+    () => AuthRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<AuthLocalDataSource>(
-    () => AuthLocalDataSourceImpl(
-      sharedPreferences: sl(),
-      secureStorage: sl(),
-    ),
+    () => AuthLocalDataSourceImpl(sharedPreferences: sl(), secureStorage: sl()),
   );
 
   sl.registerLazySingleton<UsersViewLocalDataSource>(
-    () => UsersViewLocalDataSourceImpl(
-      sharedPreferences: sl(),
-    ),
+    () => UsersViewLocalDataSourceImpl(sharedPreferences: sl()),
   );
 
   sl.registerLazySingleton<ProfileRemoteDataSource>(
-    () => ProfileRemoteDatasource(
-      dio: sl(),
-    ),
+    () => ProfileRemoteDatasource(dio: sl()),
   );
 
   sl.registerLazySingleton<UsersRemoteDataSource>(
-    () => UsersRemoteDatasource(
-      dio: sl(),
-    ),
+    () => UsersRemoteDatasource(dio: sl()),
   );
 
   sl.registerLazySingleton<UserDetailsRemoteDataSource>(
-    () => UserDetailsRemoteDatasource(dio: sl(),)
+    () => UserDetailsRemoteDatasource(dio: sl()),
   );
 
   sl.registerLazySingleton<SettingsLocalDatasource>(
-    () => SettingsLocalDatasourceImpl(
-      sharedPreferences: sl(),
-    ),
+    () => SettingsLocalDatasourceImpl(sharedPreferences: sl()),
   );
 
-  sl.registerLazySingleton<OrganisationRemoteDataSource>(() => OrganisationRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<OrganisationRemoteDataSource>(
+    () => OrganisationRemoteDataSourceImpl(dio: sl()),
+  );
 
   // ! External Dependencies (Third-party libraries)
   ////! Core
@@ -280,19 +275,19 @@ sl.registerFactory(() => OrgBloc(
         receiveTimeout: AppConfig.receiveTimeout,
       ),
     );
-    
+
     // Add our interceptor
     dio.interceptors.addAll([
       ApiInterceptor(sl(), dio),
       ErrorInterceptor(),
       LogInterceptor(requestBody: true, responseBody: true, error: true),
     ]);
-    
+
     return dio;
   });
 
   sl.registerLazySingleton(() => SignalRService(sl()));
-  
+
   // Shared Preferences (needs to be awaited)
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
