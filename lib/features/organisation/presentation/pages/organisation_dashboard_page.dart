@@ -88,68 +88,62 @@ class OrganisationListWidget extends StatelessWidget {
           } else if (type == OrgFetchType.joined) {
             displayList = state.organisations?.toList() ?? [];
           } else {
-            displayList = state.publicOrganisations ?? [];
+            displayList = state.publicOrganisations?.toList() ?? [];
           }
           // Debug Print: Check if the list actually has items before the empty check
           print("Display List Length for $type: ${displayList.length}");
 
           if (type == OrgFetchType.managed) {
             if (displayList.isEmpty) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 64, color: Colors.grey),
-                      Text("No organisations found in ${type.name}"),
-                      TextButton(
-                        onPressed: () => context.read<OrgBloc>().add(
-                          GetMyOrganisationsRequested(),
-                        ),
-                        child: Text("Refresh"),
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    Text("No organisations found in ${type.name}"),
+                    TextButton(
+                      onPressed: () => context.read<OrgBloc>().add(
+                        GetMyOrganisationsRequested(),
                       ),
-                    ],
-                  ),
+                      child: Text("Refresh"),
+                    ),
+                  ],
                 ),
               );
             }
           } else if (type == OrgFetchType.joined) {
             if (displayList.isEmpty) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 64, color: Colors.grey),
-                      Text("No organisations found in ${type.name}"),
-                      TextButton(
-                        onPressed: () => context.read<OrgBloc>().add(
-                          GetOrganisationsRequested(),
-                        ),
-                        child: Text("Refresh"),
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    Text("No organisations found in ${type.name}"),
+                    TextButton(
+                      onPressed: () => context.read<OrgBloc>().add(
+                        GetOrganisationsRequested(),
                       ),
-                    ],
-                  ),
+                      child: Text("Refresh"),
+                    ),
+                  ],
                 ),
               );
             }
           } else {
             if (displayList.isEmpty) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 64, color: Colors.grey),
-                      Text("No organisations found in ${type.name}"),
-                      TextButton(
-                        onPressed: () => context.read<OrgBloc>().add(
-                          GetPublicOrganisationsRequested(),
-                        ),
-                        child: Text("Refresh"),
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    Text("No organisations found in ${type.name}"),
+                    TextButton(
+                      onPressed: () => context.read<OrgBloc>().add(
+                        GetPublicOrganisationsRequested(),
                       ),
-                    ],
-                  ),
+                      child: Text("Refresh"),
+                    ),
+                  ],
                 ),
               );
             }
@@ -257,10 +251,13 @@ class OrganisationListWidget extends StatelessWidget {
                 );
               }
             : null,
-        child: Icon(Icons.chevron_right),
+        child: activeOrgId == org.organizationId?
+          const Icon(Icons.check_circle, color: Colors.green)
+        :
+        const Icon(Icons.chevron_right),
       );
     } else {
-      return Icon(Icons.chevron_right);
+      return const Icon(Icons.chevron_right);
     }
   }
 }

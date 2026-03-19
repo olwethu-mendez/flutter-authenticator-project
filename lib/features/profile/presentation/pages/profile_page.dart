@@ -2,6 +2,9 @@ import 'package:authentipass/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_event.dart';
 import 'package:authentipass/features/auth/presentation/bloc/auth_state.dart';
 import 'package:authentipass/features/auth/presentation/pages/splash_page.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_bloc.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_event.dart';
+import 'package:authentipass/features/organisation/presentation/bloc/org_state.dart';
 import 'package:authentipass/features/profile/data/models/user_profile_model.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:authentipass/features/profile/presentation/bloc/profile_event.dart';
@@ -28,9 +31,13 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     var authState = context.read<AuthBloc>().state;
+    var orgState = context.read<OrgBloc>().state;
     if (authState is AuthAuthenticated) {
       role = authState.role.toCommaSeparatedString();
-      activeOrganisation = authState.activeOrg;
+      context.read<OrgBloc>().add(GetOrganisationRequested(authState.activeOrg!));
+      if(orgState is OrgLoaded){
+        activeOrganisation = orgState.organisation?.name ?? authState.activeOrg;
+      }
     }
     super.initState();
   }

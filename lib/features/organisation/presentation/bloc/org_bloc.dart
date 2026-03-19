@@ -247,7 +247,7 @@ class OrgBloc extends Bloc<OrgEvent, OrgState> {
       authBloc.add(AuthCheckRequested());
 
       // 3. Refresh the list
-      add(GetMyOrganisationsRequested());
+      add(GetAllOrganisationsRequested());
     });
   }
 

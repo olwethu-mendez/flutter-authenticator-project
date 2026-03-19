@@ -371,85 +371,33 @@ class _HomeLayoutState extends State<HomeLayout> {
                         ),
                       ),
 
-                    if (profileState is ProfileLoaded)
+                    if (profileState is ProfileLoaded)...[
                       const SizedBox(height: 32),
+                    const Divider()],
+                    // Inside your ListView in _buildDrawer...
 
-                    // inside your Drawer or Profile page
-                    ListTile(
-                      leading: const Icon(Icons.business_center_outlined),
-                      title: const Text("Manage Organisations"),
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/get-organisations');
-                      },
-                    ),
-                    const Divider(),
-                    BlocBuilder<OrgBloc, OrgState>(
-                      builder: (context, state) {
-                        if (state is OrgLoading)
-                          return const Center(child: LinearProgressIndicator());
-                        if (state is OrgLoaded &&
-                            state.myOrganisations != null) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                child: Text(
-                                  "Switch Organisation",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              ...state.myOrganisations!.map((org) {
-                                // Compare against AuthBloc's activeOrg
-                                final authState = context
-                                    .read<AuthBloc>()
-                                    .state;
-                                bool isActive = false;
-                                if (authState is AuthAuthenticated) {
-                                  isActive =
-                                      org.organizationId == authState.activeOrg;
-                                }
+BlocBuilder<OrgBloc, OrgState>(
+  builder: (context, state) {
+    if (state is OrgLoading) return const LinearProgressIndicator();
 
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      org.organizationImageUrl ??
-                                          'https://placehold.co/100',
-                                    ),
-                                  ),
-                                  title: Text(org.name ?? "Unknown"),
-                                  trailing: isActive
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: Colors.green,
-                                        )
-                                      : null,
-                                  onTap: isActive
-                                      ? null
-                                      : () {
-                                          context.read<OrgBloc>().add(
-                                            SwitchOrganisationRequested(
-                                              org.organizationId ?? "",
-                                            ),
-                                          );
-                                          Navigator.pop(context);
-                                        },
-                                );
-                              }),
-                            ],
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
+    if (state is OrgLoaded) {
+      // Find the currently active organization from the list
+      final activeOrg = state.organisations?.firstWhere(
+        (org) => org.organizationId == (context.read<AuthBloc>().state as AuthAuthenticated).activeOrg,
+        orElse: () => state.organisations!.first,
+      );
+
+      return _buildDrawerItem(
+        context,
+        Icons.business_rounded,
+        'Active: ${activeOrg?.name ?? "Select Org"}',
+        () => _showOrgSwitcherModal(context, state),
+        trailing: const Icon(Icons.swap_horiz, size: 20),
+      );
+    }
+    return const SizedBox.shrink();
+  },
+),
 
                     // Menu items
                     if (profileState is ProfileLoaded &&
@@ -542,13 +490,61 @@ class _HomeLayoutState extends State<HomeLayout> {
     );
   }
 
+  void _showOrgSwitcherModal(BuildContext context, OrgLoaded state) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (modalContext) {
+      final authState = context.read<AuthBloc>().state as AuthAuthenticated;
+
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Wrap content height
+          children: [
+            Text(
+              "Switch Organisation",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const Divider(),
+            ...state.organisations!.map((org) {
+              bool isActive = org.organizationId == authState.activeOrg;
+
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(org.organizationImageUrl ?? 'https://placehold.co/100'),
+                ),
+                title: Text(org.name ?? "Unknown"),
+                trailing: isActive 
+                    ? const Icon(Icons.check_circle, color: Colors.green) 
+                    : null,
+                onTap: isActive ? null : () {
+                  context.read<OrgBloc>().add(
+                    SwitchOrganisationRequested(org.organizationId ?? ""),
+                  );
+                  Navigator.pop(modalContext); // Close modal
+                },
+              );
+            }).toList(),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    },
+  );
+}
+
   Widget _buildDrawerItem(
     BuildContext context,
     IconData icon,
     String title,
-    VoidCallback onTap, {
-    bool isLogout = false,
-  }) {
+    VoidCallback onTap, 
+    {
+      Widget? trailing,
+      bool isLogout = false,
+    }) {
     return ListTile(
       leading: Icon(
         icon,
@@ -562,6 +558,7 @@ class _HomeLayoutState extends State<HomeLayout> {
         ),
       ),
       onTap: onTap,
+      trailing: trailing,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
